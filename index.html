@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>🌡️ El Termómetro de las Emociones</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #111;
+      color: #fff;
+      text-align: center;
+      padding: 40px;
+    }
+    h1 {
+      color: #ffcc00;
+      font-size: 2.5em;
+    }
+    .descripcion {
+      max-width: 700px;
+      margin: 0 auto 30px auto;
+      font-size: 1.1em;
+      color: #ddd;
+    }
+    .container {
+      display: none;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 50px;
+      flex-wrap: wrap;
+    }
+    .emotion-box {
+      font-size: 2em;
+      margin: 30px;
+      padding: 20px;
+      border: 2px solid #fff;
+      border-radius: 15px;
+      display: inline-block;
+      transition: background-color 0.3s, color 0.3s;
+      color: #000;
+    }
+    .valencia {
+      font-size: 1.2em;
+      margin-top: 8px;
+      color: #ccc;
+    }
+    .btn {
+      margin: 10px;
+      padding: 12px 20px;
+      font-size: 1em;
+      background-color: #ffcc00;
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background-color: #ffe066;
+    }
+    #resultado {
+      margin-top: 20px;
+      font-size: 1.2em;
+    }
+    #puntaje {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .termometro-container {
+      width: 60px;
+      height: 300px;
+      background: #333;
+      border-radius: 30px;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid #fff;
+    }
+    .nivel {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background: linear-gradient(to top, #ff0000, #ffcc00, #00ff00);
+      transition: height 0.5s ease;
+    }
+    .porcentaje-termometro {
+      margin-top: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #ffcc00;
+    }
+    .etiqueta-termometro {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    #reiniciarBtn {
+      display: none;
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
+      background-color: #00c853;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    #reiniciarBtn:hover {
+      background-color: #00e676;
+    }
+    #mensajeFinal {
+      display: none;
+      margin-top: 30px;
+      margin-bottom: 10px;
+      background-color: #222;
+      color: #ffcc00;
+      border: 2px solid #ffcc00;
+      border-radius: 12px;
+      padding: 15px;
+      font-size: 1em;
+      width: 90%;
+      max-width: 200px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+    .idioma-selector {
+      margin-top: 60px;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="titulo"></h1>
+  <p class="descripcion" id="descripcion"></p>
+
+  <div class="idioma-selector" id="idiomaSelector">
+    <div style="
+  background-color: #111;
+  padding: 40px 20px;              
+  text-align: center;
+">
+  <img src="https://i.postimg.cc/Kj8FTn0B/Proyecto-nuevo-16.png" 
+       alt="Emoción personaje" 
+       style="max-width: 300px; width: 90%; height: auto; box-shadow: 0 0 20px rgba(255, 255, 255, 0.1); border-radius: 12px;">
+</div>
+
+    <p><strong>Selecciona tu idioma / Select your language / Choisissez votre langue :</strong></p>
+    <button class="btn" onclick="seleccionarIdioma('es')">🇪🇸 Español</button>
+    <button class="btn" onclick="seleccionarIdioma('en')">🇬🇧 English</button>
+    <button class="btn" onclick="seleccionarIdioma('fr')">🇫🇷 Français</button>
+ 
+
+
+  </div>
+
+  <div class="container" id="juego">
+    <div>
+      <div class="emotion-box" id="emocionActual">🤔</div>
+      <button class="btn" onclick="reproducirVozActual()">🔊 Escuchar</button>
+      <div class="valencia" id="valenciaActual">Valencia: -</div>
+      <div>
+        <button class="btn" id="btnPrimaria" onclick="responder('Primaria')"></button>
+        <button class="btn" id="btnSecundaria" onclick="responder('Secundaria')"></button>
+      </div>
+      <div id="resultado"></div>
+      <div id="puntaje"></div>
+      <div id="mensajeFinal"></div>
+      <button id="reiniciarBtn" onclick="reiniciarJuego()"></button>
+      <button class="btn" onclick="volverAlMenu()">🔙 Volver al idioma</button>
+    </div>
+
+    <div>
+      <div class="termometro-container">
+        <div class="nivel" id="nivel" style="height: 0%;"></div>
+      </div>
+      <div class="porcentaje-termometro" id="porcentajeNivel">0%</div>
+      <div class="etiqueta-termometro" id="etiquetaTermometro"></div>
+    </div>
+  </div>
+
+  <script>
+    const textos = {
+      es: {
+        titulo: "🌡️ El Termómetro de las Emociones",
+        descripcion: "A lo largo del juego se te mostrarán distintas emociones representadas con colores y emojis. Tu reto es clasificarlas correctamente según su tipo. Cada acierto subirá tu termómetro... ¡hasta llegar al nivel experto emocional. Este juego no solo fortalece tu inteligencia emocional, sino que también promueve el aprendizaje multilingüe.",
+        primaria: "Primaria",
+        secundaria: "Secundaria",
+        puntaje: "Puntaje",
+        etiqueta: "Termómetro de Emoción",
+        reiniciar: "🔁 Reiniciar",
+        correcto: "✅ ¡Correcto!",
+        incorrecto: tipo => `❌ Era ${tipo}.`,
+        final: puntaje => puntaje === 14 ? "🎉 ¡Felicidades! Clasificaste todas las emociones correctamente. ¡Eres un experto en emociones!" : `🎉 ¡Buen intento! Acertaste ${puntaje} de 14 emociones. ¡Sigue practicando!`
+      },
+      en: {
+        titulo: "🌡️ The Emotion Thermometer",
+        descripcion: "Throughout the game, you'll be shown different emotions represented by colors and emojis. Your challenge is to correctly classify them according to their type. Each correct answer will raise your thermometer... until you reach the emotional expert level. This game not only strengthens your emotional intelligence but also promotes multilingual learning.",
+        primaria: "Primary",
+        secundaria: "Secondary",
+        puntaje: "Score",
+        etiqueta: "Emotion Thermometer",
+        reiniciar: "🔁 Restart",
+        correcto: "✅ Correct!",
+        incorrecto: tipo => `❌ It was ${tipo}.`,
+        final: puntaje => puntaje === 14 ? "🎉 Congrats! You classified all emotions correctly. You're an emotional expert!" : `🎉 Good try! You got ${puntaje} out of 14. Keep practicing!`
+      },
+      fr: {
+        titulo: "🌡️ Le Thermomètre des Émotions",
+        descripcion: "Tout au long du jeu, différentes émotions vous seront présentées, représentées par des couleurs et des émojis. Votre défi est de les classer correctement selon leur type. Chaque bonne réponse fera grimper votre niveau… jusqu'à atteindre le niveau d'expert émotionnel. Ce jeu renforce non seulement votre intelligence émotionnelle, mais favorise également l'apprentissage multilingue.",
+        primaria: "Primaire",
+        secundaria: "Secondaire",
+        puntaje: "Score",
+        etiqueta: "Thermomètre Émotionnel",
+        reiniciar: "🔁 Recommencer",
+        correcto: "✅ Correct !",
+        incorrecto: tipo => `❌ C'était ${tipo}.`,
+        final: puntaje => puntaje === 14 ? "🎉 Félicitations ! Tu as classé toutes les émotions correctement. Tu es un expert émotionnel !" : `🎉 Bien essayé ! Tu as trouvé ${puntaje} sur 14. Continue à t'entraîner !`
+      }
+    };
+
+    const emociones = [
+      { nombre: { es: "Alegría 😄", en: "Joy 😄", fr: "Joie 😄" }, tipo: "Primaria", valencia: { es: "Agradable", en: "Pleasant", fr: "Agréable" }, color: "#fdd835" },
+      { nombre: { es: "Tristeza 😢", en: "Sadness 😢", fr: "Tristesse 😢" }, tipo: "Primaria", valencia: { es: "Desagradable", en: "Unpleasant", fr: "Désagréable" }, color: "#64b5f6" },
+      { nombre: { es: "Ira 😠", en: "Anger 😠", fr: "Colère 😠" }, tipo: "Primaria", valencia: { es: "Desagradable", en: "Unpleasant", fr: "Désagréable" }, color: "#c62828" },
+      { nombre: { es: "Miedo 😱", en: "Fear 😱", fr: "Peur 😱" }, tipo: "Primaria", valencia: { es: "Desagradable", en: "Unpleasant", fr: "Désagréable" }, color: "#424242" },
+      { nombre: { es: "Asco 🤢", en: "Disgust 🤢", fr: "Dégoût 🤢" }, tipo: "Primaria", valencia: { es: "Desagradable", en: "Unpleasant", fr: "Désagréable" }, color: "#81c784" },
+      { nombre: { es: "Sorpresa 😲", en: "Surprise 😲", fr: "Surprise 😲" }, tipo: "Primaria", valencia: { es: "Neutral", en: "Neutral", fr: "Neutre" }, color: "#f06292" },
+      { nombre: { es: "Culpa 😞", en: "Guilt 😞", fr: "Culpabilité 😞" }, tipo: "Secundaria", valencia: { es: "Desagradable", en: "Unpleasant", fr: "Désagréable" }, color: "#c2185b" },
+      { nombre: { es: "Vergüenza 🫣", en: "Shame 🫣", fr: "Honte 🫣" }, tipo: "Secundaria", valencia: { es: "Desagradable", en: "Unpleasant", fr: "Désagréable" }, color: "#f06292" },
+      { nombre: { es: "Amor ❤️", en: "Love ❤️", fr: "Amour ❤️" }, tipo: "Secundaria", valencia: { es: "Agradable", en: "Pleasant", fr: "Agréable" }, color: "#f06292" },
+      { nombre: { es: "Orgullo 😎", en: "Pride 😎", fr: "Fierté 😎" }, tipo: "Secundaria", valencia: { es: "Agradable", en: "Pleasant", fr: "Agréable" }, color: "#4fc3f7" },
+      { nombre: { es: "Celos 😒", en: "Jealousy 😒", fr: "Jalousie 😒" }, tipo: "Secundaria", valencia: { es: "Desagradable", en: "Unpleasant", fr: "Désagréable" }, color: "#8bc34a" },
+      { nombre: { es: "Gratitud 🙏", en: "Gratitude 🙏", fr: "Gratitude 🙏" }, tipo: "Secundaria", valencia: { es: "Agradable", en: "Pleasant", fr: "Agréable" }, color: "#e91e63" },
+      { nombre: { es: "Frustración 😫", en: "Frustration 😫", fr: "Frustration 😫" }, tipo: "Secundaria", valencia: { es: "Desagradable", en: "Unpleasant", fr: "Désagréable" }, color: "#ff6700" },
+      { nombre: { es: "Esperanza 🌈", en: "Hope 🌈", fr: "Espoir 🌈" }, tipo: "Secundaria", valencia: { es: "Agradable", en: "Pleasant", fr: "Agréable" }, color: "#39ff14" }
+    ];
+
+    let idioma = "es";
+    let emocionesJuego = [];
+    let emocionActual = {};
+    let puntaje = 0;
+    let nivelEmocion = 0;
+
+    function seleccionarIdioma(lang) {
+      idioma = lang;
+      document.getElementById("idiomaSelector").style.display = "none";
+      document.getElementById("juego").style.display = "flex";
+      actualizarTextos();
+      reiniciarJuego();
+    }
+
+    function volverAlMenu() {
+      document.getElementById("idiomaSelector").style.display = "block";
+      document.getElementById("juego").style.display = "none";
+    }
+
+    function actualizarTextos() {
+      const t = textos[idioma];
+      document.getElementById("titulo").textContent = t.titulo;
+      document.getElementById("descripcion").textContent = t.descripcion;
+      document.getElementById("btnPrimaria").textContent = t.primaria;
+      document.getElementById("btnSecundaria").textContent = t.secundaria;
+      document.getElementById("puntaje").textContent = `${t.puntaje}: 0`;
+      document.getElementById("etiquetaTermometro").textContent = t.etiqueta;
+      document.getElementById("reiniciarBtn").textContent = t.reiniciar;
+    }
+
+    function mezclar(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function nuevaEmocion() {
+      if (emocionesJuego.length === 0) {
+        const t = textos[idioma];
+        document.getElementById("mensajeFinal").textContent = t.final(puntaje);
+        document.getElementById("mensajeFinal").style.display = "block";
+        document.getElementById("reiniciarBtn").style.display = "inline-block";
+        document.getElementById("emocionActual").textContent = "🏁";
+        document.getElementById("valenciaActual").textContent = "";
+        document.getElementById("emocionActual").style.backgroundColor = "#444";
+        return;
+      }
+      emocionActual = emocionesJuego.pop();
+      document.getElementById("emocionActual").textContent = emocionActual.nombre[idioma];
+      document.getElementById("valenciaActual").textContent = `Valencia: ${emocionActual.valencia[idioma]}`;
+      document.getElementById("emocionActual").style.backgroundColor = emocionActual.color;
+      document.getElementById("resultado").textContent = "";
+    }
+
+    function actualizarTermometro() {
+      const porcentaje = (nivelEmocion / 14) * 100;
+      document.getElementById("nivel").style.height = porcentaje + "%";
+      document.getElementById("porcentajeNivel").textContent = Math.round(porcentaje) + "%";
+    }
+
+    function responder(respuesta) {
+      const t = textos[idioma];
+      const correcto = respuesta === emocionActual.tipo;
+      const mensaje = correcto ? t.correcto : t.incorrecto(emocionActual.tipo);
+      if (correcto) {
+        puntaje++;
+        if (nivelEmocion < 14) nivelEmocion++;
+      } else {
+        if (nivelEmocion > 0) nivelEmocion--;
+      }
+      document.getElementById("resultado").textContent = mensaje;
+      document.getElementById("puntaje").textContent = `${t.puntaje}: ${puntaje}`;
+      actualizarTermometro();
+      setTimeout(nuevaEmocion, 1500);
+    }
+
+    function reiniciarJuego() {
+      emocionesJuego = mezclar([...emociones]);
+      puntaje = 0;
+      nivelEmocion = 0;
+      document.getElementById("mensajeFinal").style.display = "none";
+      document.getElementById("reiniciarBtn").style.display = "none";
+      actualizarTextos();
+      actualizarTermometro();
+      nuevaEmocion();
+    }
+    
+    
+    
+    function reproducirVozActual() {
+  const nombre = emocionActual.nombre[idioma];
+  const valencia = emocionActual.valencia[idioma];
+
+  const mensaje = new SpeechSynthesisUtterance(`${nombre}, ${valencia}`);
+  mensaje.lang = idioma === 'es' ? 'es-ES' : idioma === 'en' ? 'en-GB' : 'fr-FR';
+  mensaje.rate = 1;
+  mensaje.pitch = 1;
+  window.speechSynthesis.cancel(); // detener otras voces si las hay
+  window.speechSynthesis.speak(mensaje);
+}
+
+  </script>
+  
+  <section style="
+  background-color: #111;
+  color: #fff;
+  padding: 40px;
+  max-width: 900px;
+  margin: 50px auto;
+  font-family: 'Times New Roman', serif;
+  border-top: 2px solid #FFD700;
+">
+  <h2 style="color: #FFD700; font-size: 2em; text-align: center; margin-bottom: 25px;">
+    Beneficios del juego "El Termómetro de las Emociones"
+  </h2>
+  <ul style="
+    list-style: none;
+    padding-left: 0;
+    font-size: 1.1em;
+    line-height: 1.5;
+    text-align: justify;
+  ">
+    <li><strong>🧠 Fortalece la inteligencia emocional:</strong> Facilita la identificación, clasificación y comprensión de emociones básicas y complejas en una experiencia lúdica e interactiva.</li><br>
+    <li><strong>🎯 Fomenta decisiones conscientes:</strong> Invita a reflexionar sobre la naturaleza de las emociones y a elegir respuestas más empáticas y reguladas.</li><br>
+    <li><strong>🌐 Promueve el aprendizaje multilingüe:</strong> Permite interactuar en español, inglés y francés, favoreciendo el vocabulario emocional en varios idiomas.</li><br>
+    <li><strong>🔊 Estimula la escucha activa:</strong> La función de audio asocia cada emoción con su pronunciación, fortaleciendo el reconocimiento auditivo y visual.</li><br>
+    <li><strong>🧩 Integra emoción, juego y tecnología:</strong> La interfaz visual y el componente interactivo despiertan interés, participación y comprensión profunda.</li><br>
+    <li><strong>📈 Ofrece retroalimentación positiva:</strong> El termómetro emocional refleja el progreso, incentivando la motivación y el desarrollo emocional continuo.</li>
+  </ul>
+  <p style="margin-top: 25px; font-size: 1em; color: #ccc; text-align: justify;">
+    Este juego convierte la exploración emocional en una experiencia educativa significativa, combinando tecnología, reflexión y creatividad. Ideal para espacios escolares, terapéuticos y familiares. 💛
+  </p>
+</section>
+
+
+<footer style="
+  background-color: #000;
+  color: #FFD700;
+  text-align: center;
+  padding: 25px 15px;
+  font-family: 'Arial', sans-serif;
+  font-size: 1em;
+  border-top: 2px solid #FFD700;
+  line-height: 1.4;
+">
+  <p style="margin: 5px 0;">🌟 Parte del proyecto creativo en evolución <strong style="color: #fff;">“Emociones en el Aula”</strong></p>
+  <p style="margin: 5px 0;">🔧 Este proyecto se mejora constantemente con nuevas herramientas y experiencias reales.</p>
+  <p style="margin: 5px 0;">📘 Desarrollado con 💛 por <strong style="color: #fff;">Yobana Orozco Benavides</strong></p>
+  <p style="margin: 5px 0;">🔒 Uso educativo — <span style="color:#FFA500; font-weight: bold;">sin fines comerciales</span></p>
+  <p style="margin: 8px 0;">Más en: 
+    <a href="https://yobanaorozcoartista.bio.link/" target="_blank" style="color: #FFD700; text-decoration: underline; font-weight: bold;">
+      yobanaorozcoartista.bio.link
+    </a>
+  </p>
+
+  <!-- Imágenes insertadas -->
+  <div style="margin-top: 15px;">
+    <img src="https://i.postimg.cc/dqKj7LQQ/480702220-618041787505911-8280549859336367380-n.jpg" 
+         alt="Logo 1" 
+         style="width: 60px; height: auto; margin: 0 10px; border-radius: 8px; border: 1px solid #FFD700;">
+    <img src="https://i.postimg.cc/NfcBdfV4/418b1c0f-8d2a-463f-9cb1-271bd0abfd0e-1.png" 
+         alt="Logo 2" 
+         style="width: 60px; height: auto; margin: 0 10px; border-radius: 8px; border: 1px solid #FFD700;">
+  </div>
+
+  <p style="margin-top: 12px; font-size: 0.8em; color: #888;">© 2025 - Todos los derechos reservados</p>
+</footer>
+
+  
+  
+  
+  
+  
